@@ -1,0 +1,31 @@
+{
+  "@context": ["http://www.w3.org/ns/odrl.jsonld", "https://w3id.org/odrl-ai/context"],
+  "@type": "Agreement",
+  "uid": "https://example.org/policy/aia-2026-002",
+  "profile": "https://w3id.org/odrl-ai",
+  "assigner": "ex:member-organisation-B",
+  "assignee": "ex:advisory-service-provider",
+  "target": "ex:operational-dataset-A",
+  "permission": [
+    {
+      "action": "aia:Retrieve",
+      "constraint": [
+        { "leftOperand": "aia:modelPurpose", "operator": "eq", "rightOperand": "aia:SectorAdvisory" },
+        { "leftOperand": "aia:deploymentJurisdiction", "operator": "isPartOf", "rightOperand": "EU" }
+      ],
+      "duty": [{ "action": "aia:RecordProvenance" }]
+    },
+    { "action": "aia:Embed" },
+    {
+      "action": "aia:FineTune",
+      "constraint": [
+        { "leftOperand": "aia:modelClass", "operator": "eq", "rightOperand": "domain-specific" }
+      ],
+      "duty": [{ "action": "aia:RecordProvenance" }, { "action": "aia:NotifyDownstream" }]
+    }
+  ],
+  "prohibition": [
+    { "action": "aia:Distill" },
+    { "action": "aia:Synthesize" }
+  ]
+}

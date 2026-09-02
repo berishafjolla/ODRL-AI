@@ -1,0 +1,23 @@
+{
+  "@type": "Agreement",
+  "uid": "urn:example:policy:aia-2026-001",
+  "assigner": "ex:member-organisation-A",
+  "assignee": "ex:advisory-service-provider",
+  "target": "ex:operational-dataset-2026",
+  "permission": [
+    {
+      "action": "aia:Retrieve",
+      "constraint": [
+        { "leftOperand": "aia:modelPurpose", "operator": "eq", "rightOperand": "aia:SectorAdvisory" },
+        { "leftOperand": "aia:deploymentJurisdiction", "operator": "isPartOf", "rightOperand": "EU" }
+      ],
+      "duty": [{ "action": "aia:RecordProvenance" }]
+    },
+    { "action": "aia:Embed" }
+  ],
+  "prohibition": [
+    { "action": "aia:Train" },
+    { "action": "aia:FineTune" },
+    { "action": "aia:Distill" }
+  ]
+}
