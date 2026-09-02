@@ -1,4 +1,4 @@
-"""Execute the Section 7 demonstration end to end and print the Table 3 outcomes.
+"""Execute the demonstration end to end and print the Table 3 outcomes.
 
 A shared AI advisory service is fed by two contributors: one permitting only
 retrieval, one additionally permitting fine-tuning. The script runs admission,
