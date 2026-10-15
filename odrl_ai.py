@@ -52,6 +52,28 @@ def _bare(term):
     return term
 
 
+def _action_id(action):
+    """An ODRL action is a term, or (when refined) [{rdf:value, refinement}]."""
+    if isinstance(action, list):
+        action = action[0]
+    if isinstance(action, dict):
+        action = action["rdf:value"]["@id"]
+    return _bare(action)
+
+
+def _refinements(action) -> dict:
+    """Profile refinements of a refined action, e.g. {'deadline': 'P30D'}."""
+    if not isinstance(action, list):
+        return {}
+    out = {}
+    for r in action[0].get("refinement", []):
+        v = r["rightOperand"]
+        if isinstance(v, dict):
+            v = v.get("@id", v.get("@value"))
+        out[_bare(r["leftOperand"])] = _bare(v)
+    return out
+
+
 # ---------------------------------------------------------------------------
 # Constraint evaluation
 # ---------------------------------------------------------------------------
@@ -91,6 +113,7 @@ class Policy:
     permissions: list = field(default_factory=list)
     prohibitions: list = field(default_factory=list)
     obligations: list = field(default_factory=list)
+    triggered: dict = field(default_factory=dict)  # event-triggered duties
 
     @staticmethod
     def from_jsonld(doc) -> "Policy":
@@ -98,16 +121,30 @@ class Policy:
             doc = json.loads(doc)
         p = Policy(target=doc.get("target", ""))
         for perm in doc.get("permission", []):
+            duties = []
+            for x in perm.get("duty", []):
+                refs = _refinements(x["action"])
+                if "trigger" in refs:  # not due at grant; activated by its event
+                    p.triggered[_action_id(x["action"])] = refs
+                else:
+                    duties.append(_action_id(x["action"]))
             p.permissions.append(Rule(
-                action=_bare(perm["action"]),
+                action=_action_id(perm["action"]),
                 constraints=perm.get("constraint", []),
-                duties=[_bare(x["action"]) for x in perm.get("duty", [])],
+                duties=duties,
             ))
         for pro in doc.get("prohibition", []):
-            p.prohibitions.append(Rule(action=_bare(pro["action"])))
+            p.prohibitions.append(Rule(action=_action_id(pro["action"])))
         for ob in doc.get("obligation", []):
-            p.obligations.append(Rule(action=_bare(ob["action"])))
+            p.obligations.append(Rule(action=_action_id(ob["action"])))
         return p
+
+    def revocation_deadline_days(self):
+        """Deadline of the duty triggered by revocation (aia:deadline, e.g. P30D)."""
+        for refs in self.triggered.values():
+            if refs.get("trigger") == "RevocationEvent" and "deadline" in refs:
+                return int(refs["deadline"].strip("PD"))
+        return None
 
     @staticmethod
     def from_file(path) -> "Policy":

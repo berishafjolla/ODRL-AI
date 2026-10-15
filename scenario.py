@@ -1,4 +1,4 @@
-"""Execute the demonstration end to end and print the Table 3 outcomes.
+"""Execute the demonstration end to end and print the Table 2 outcomes.
 
 A shared AI advisory service is fed by two contributors: one permitting only
 retrieval, one additionally permitting fine-tuning. The script runs admission,
@@ -54,9 +54,14 @@ show("Ongoing use", "Retrieve, advisory, US",
      "Permitted" if d else f"Denied ({d.reason})")
 
 # --- Revocation (post-use; attribute mutation) ---
-out = mgr.revoke("fine-tune-member", permitted_incorporating=True)
+# Effect and deadline come from the policies: admission to the corpus, and the
+# aia:deadline refinement of the duty triggered by aia:RevocationEvent.
+out = mgr.revoke("fine-tune-member",
+                 permitted_incorporating=route_admission(fine_tune)[0] == "corpus",
+                 deadline_days=fine_tune.revocation_deadline_days())
 show("Revocation (fine-tune member)", "RevocationEvent", out)
 mgr.attest("fine-tune-member")
 
-out = mgr.revoke("retrieval-only-member", permitted_incorporating=False)
+out = mgr.revoke("retrieval-only-member",
+                 permitted_incorporating=route_admission(retrieval_only)[0] == "corpus")
 show("Revocation (retrieval-only member)", "RevocationEvent", out)

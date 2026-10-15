@@ -1,6 +1,11 @@
 {
+  "@context": [
+    "http://www.w3.org/ns/odrl.jsonld",
+    { "aia": "https://w3id.org/odrl-ai#", "ex": "https://example.org/" }
+  ],
   "@type": "Agreement",
   "uid": "urn:example:policy:aia-2026-002",
+  "profile": "https://w3id.org/odrl-ai",
   "assigner": "ex:member-organisation-B",
   "assignee": "ex:advisory-service-provider",
   "target": "ex:operational-dataset-A",
@@ -19,7 +24,20 @@
       "constraint": [
         { "leftOperand": "aia:modelClass", "operator": "eq", "rightOperand": "domain-specific" }
       ],
-      "duty": [{ "action": "aia:RecordProvenance" }, { "action": "aia:NotifyDownstream" }]
+      "duty": [
+        { "action": "aia:RecordProvenance" },
+        { "action": "aia:NotifyDownstream" },
+        {
+          "action": [{
+            "rdf:value": { "@id": "aia:AttestDeletion" },
+            "refinement": [
+              { "leftOperand": "aia:trigger", "operator": "eq", "rightOperand": { "@id": "aia:RevocationEvent" } },
+              { "leftOperand": "aia:deadline", "operator": "lteq", "rightOperand": { "@value": "P30D", "@type": "xsd:duration" } },
+              { "leftOperand": "aia:discharge", "operator": "eq", "rightOperand": { "@id": "aia:NonInclusionAttestation" } }
+            ]
+          }]
+        }
+      ]
     }
   ],
   "prohibition": [

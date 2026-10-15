@@ -2,7 +2,7 @@
 
 They check the taxonomy classification, the permit and deny decisions across
 the UCON phases, prohibition and constraint handling, and the full revocation
-lifecycle, reproducing the outcomes of Table 3 in the paper.
+lifecycle, reproducing the outcomes of Table 2 in the paper.
 
 Run with:  python -m unittest -v
 """
